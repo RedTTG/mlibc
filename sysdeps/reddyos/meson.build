@@ -7,14 +7,15 @@ sysdep_supported_options = {
 
 rtld_sources += files(
     'generic/sysdeps.cpp',
-    #    'generic/syscall.cpp',
+#    'generic/syscustom.cpp',
 )
 rtld_include_dirs += include_directories('include')
 #
 libc_sources += files(
     'generic/entry.cpp',
     'generic/sysdeps.cpp',
-    #    'generic/syscall.cpp',
+    'generic/syscustom.cpp',
+    'src/terminal.cpp',
 )
 libc_include_dirs += include_directories('include')
 
@@ -73,6 +74,12 @@ if not no_headers
         'include/abi-bits/utmpx.h',
         'include/abi-bits/utmp-defines.h',
         subdir : 'abi-bits',
+        follow_symlinks : true
+    )
+    install_headers(
+        'include/reddyos/syscustom.h',
+        'include/reddyos/terminal.h',
+        subdir : 'reddyos',
         follow_symlinks : true
     )
 endif

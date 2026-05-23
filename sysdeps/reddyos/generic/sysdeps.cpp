@@ -85,5 +85,4 @@ namespace mlibc {
     int sys_vm_map(void*, unsigned long, int, int, int, long, void**) {
         return stub_syscall();
     }
-
 }
