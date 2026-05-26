@@ -10,8 +10,12 @@
 #define SYSCALL_STAT 4
 #define SYSCALL_FSTAT 5
 #define SYSCALL_LSEEK 8
+#define SYSCALL_MMAP 9
 #define SYSCALL_IOCTL 16
 #define SYSCALL_TERM 100
+#define SYSCALL_STUB 999
+
+
 
 #ifndef __MLIBC_ABI_ONLY
 
