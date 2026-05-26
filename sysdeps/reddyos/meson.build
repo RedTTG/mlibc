@@ -79,6 +79,7 @@ if not no_headers
     install_headers(
         'include/reddyos/syscustom.h',
         'include/reddyos/terminal.h',
+        'include/reddyos/fb.h',
         subdir : 'reddyos',
         follow_symlinks : true
     )
