@@ -1,3 +1,4 @@
+#include <bits/syscall.h>
 #include <reddyos/syscalls.h>
 #include <reddyos/syscustom.h>
 

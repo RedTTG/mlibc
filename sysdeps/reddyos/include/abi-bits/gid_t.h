@@ -1,8 +1,1 @@
-
-#ifndef _ABIBITS_GID_T_H
-#define _ABIBITS_GID_T_H
-
-typedef unsigned int gid_t;
-
-#endif /* _ABIBITS_GID_T_H */
-
+/home/red/CLionProjects/ReddyOS/toolchain/mlibc/abis/linux/gid_t.h

@@ -9,108 +9,126 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <mlibc/fsfd_target.hpp>
+
+
+// ANCHOR: stub
+#define STUB()                                                                                     \
+	({                                                                                             \
+		__ensure(!"STUB function was called");                                                     \
+		__builtin_unreachable();                                                                   \
+	})
+// ANCHOR_END: stub
 
 namespace mlibc {
-    int stub_syscall(const char *name) {
-        return syscall(SYSCALL_STUB, (uint64_t) name);
-    }
 
-    int sys_read(int fd, void *buff, size_t count, ssize_t *bytes_read) {
-        long ret = syscall(SYSCALL_READ, fd, (uint64_t) buff, count);
-        if (ret < 0)
-            return ret;
-        *bytes_read = ret;
-        return 0;
-    }
-
-    int sys_write(int fd, const void *buff, size_t count, ssize_t *bytes_written) {
-        long ret = syscall(SYSCALL_WRITE, fd, (uint64_t) buff, count);
-        if (ret < 0)
-            return ret;
-        *bytes_written = ret;
-        return 0;
-    }
-
-    int sys_open(const char *pathname, int flags, mode_t mode, int *fd) {
-        long ret = syscall(SYSCALL_OPEN, (uint64_t) pathname, flags, mode);
-        if (ret < 0)
-            return ret;
-        *fd = ret;
-        return 0;
-    };
-
-    int sys_close(int fd) {
-        return syscall(SYSCALL_CLOSE, fd);
-    }
-
-    int sys_stat(const char *filename, struct stat *buffer) {
-        return syscall(SYSCALL_STAT, (uint64_t) filename, (uint64_t) buffer);
-    }
-
-    int sys_fstat(int fd, struct stat *buffer) {
-        return syscall(SYSCALL_FSTAT, fd, (uint64_t) buffer);
-    }
-
-    int sys_lseek(int fd, off_t offset, int whence, off_t *new_offset) {
-        long ret = syscall(SYSCALL_LSEEK, fd, offset, whence);
-        if (ret < 0)
-            return ret;
-        *new_offset = ret;
-        return 0;
-    }
-
-    int sys_ioctl(int fd, uint64_t cmd, uint64_t arg) {
-        return syscall(SYSCALL_IOCTL, fd, cmd, arg);
-    }
-
-    // TODO: STUBS
-    int sys_anon_allocate(size_t size, void **pointer) {
-        long ret = syscall(SYSCALL_MMAP, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (ret < 0)
-            return ENOMEM;
-        *pointer = (void*)ret;
-        return 0;
-    }
-
-    int sys_anon_free(void *, unsigned long) {
-        return stub_syscall("sys_anon_free");
-    }
-
-    int sys_clock_get(int, long *, long *) {
-        return stub_syscall("sys_clock_get");
-    }
-
-    void sys_exit(int) {
-        stub_syscall("sys_exit");
-    }
-
-    int sys_futex_wait(int *, int, timespec const *) {
-        return stub_syscall("sys_futex_wait");
-    }
-
-    int sys_futex_wake(int *) {
-        return stub_syscall("sys_futex_wake");
-    }
-
-    void sys_libc_log(char const *log) {
-        terminal_write("libc log: ");
-        terminal_write(log);
-        terminal_write("\n");
-    }
-
-    void Sysdeps<LibcPanic>::operator()() {
-        stub_syscall("sys_libc_panic");
-    }
-
-    int sys_seek(int, long, int, long *) {
-        return stub_syscall("sys_seek");
-    }
-
-    int sys_tcb_set(void *) {
-        return stub_syscall("sys_tcb_set");
-    }
-
-    int sys_vm_map(void *, unsigned long, int, int, int, long, void **) {
-        return stub_syscall("sys_vm_map");
-    }
+void Sysdeps<LibcPanic>::operator()() {
+    STUB();
 }
+
+void Sysdeps<LibcLog>::operator()(const char *msg) {
+    terminal_write("libc log: ");
+    terminal_write(msg);
+    terminal_write("\n");
+}
+
+int Sysdeps<Isatty>::operator()(int fd) {
+    STUB();
+}
+
+int Sysdeps<Write>::operator()(int fd, void const *buf, size_t size, ssize_t *bytes_written) {
+	long result = syscall(SYSCALL_WRITE, fd, (uint64_t) buf, size);
+	if (result < 0)
+		return result;
+	*bytes_written = result;
+	return 0;
+}
+
+int Sysdeps<TcbSet>::operator()(void *pointer) {
+    STUB();
+}
+
+int Sysdeps<AnonAllocate>::operator()(size_t size, void **pointer) {
+    long ret = syscall(SYSCALL_MMAP, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ret < 0)
+        return ENOMEM;
+    *pointer = (void*)ret;
+    return 0;
+}
+
+int Sysdeps<AnonFree>::operator()(void *, unsigned long) {
+    STUB();
+} // no-op
+
+int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offset) {
+	long result = syscall(SYSCALL_LSEEK, fd, offset, whence);
+	if (result < 0)
+		return result;
+	*new_offset = result;
+	return 0;
+}
+
+// int Sysdeps<Stat>::operator()(mlibc::fsfd_target fsfdt, int fd, const char *path, int flags, struct stat *statbuf) {
+// 	if (fsfdt == mlibc::fsfd_target::path) {
+// 		// sys_stat behavior
+// 		return syscall(SYSCALL_STAT, (uint64_t) path, (uint64_t) statbuf);
+// 	} else if (fsfdt == mlibc::fsfd_target::fd) {
+// 		// sys_fstat behavior
+// 		return syscall(SYSCALL_FSTAT, fd, (uint64_t) statbuf);
+// 	}
+// 	// fd_path: for now, use fd if available, otherwise fall back to path
+// 	if (fd >= 0) {
+// 		return syscall(SYSCALL_FSTAT, fd, (uint64_t) statbuf);
+// 	} else if (path) {
+// 		return syscall(SYSCALL_STAT, (uint64_t) path, (uint64_t) statbuf);
+// 	}
+// 	return -1;
+// }
+
+void Sysdeps<Exit>::operator()(int status) {
+    STUB();
+}
+
+int Sysdeps<Close>::operator()(int fd) {
+	return syscall(SYSCALL_CLOSE, fd);
+}
+
+int Sysdeps<FutexWake>::operator()(int *, bool) {
+	STUB();
+}
+int Sysdeps<FutexWait>::operator()(int *, int, timespec const *) {
+	STUB();
+}
+int Sysdeps<Read>::operator()(int fd, void *buf, unsigned long count, long *bytes_read) {
+	long result = syscall(SYSCALL_READ, fd, (uint64_t) buf, count);
+	if (result < 0)
+		return result;
+	*bytes_read = result;
+	return 0;
+}
+int Sysdeps<Open>::operator()(const char *pathname, int flags, unsigned int mode, int *fd) {
+	long result = syscall(SYSCALL_OPEN, (uint64_t) pathname, flags, mode);
+	if (result < 0)
+		return result;
+	*fd = result;
+	return 0;
+}
+int Sysdeps<VmMap>::operator()(void *, size_t, int, int, int, off_t, void **) {
+	STUB();
+}
+int Sysdeps<VmUnmap>::operator()(void *, size_t) {
+	STUB();
+}
+int Sysdeps<ClockGet>::operator()(int, time_t *, long *) {
+	STUB();
+}
+
+// int Sysdeps<Ioctl>::operator()(int fd, unsigned long request, void *arg, int *result) {
+// 	long ret = syscall(SYSCALL_IOCTL, fd, request, (uint64_t) arg);
+// 	if (ret < 0)
+// 		return ret;
+// 	*result = ret;
+// 	return 0;
+// }
+
+} // namespace mlibc

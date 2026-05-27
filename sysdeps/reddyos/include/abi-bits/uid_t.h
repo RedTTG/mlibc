@@ -1,8 +1,1 @@
-
-#ifndef _ABIBITS_UID_T_H
-#define _ABIBITS_UID_T_H
-
-typedef unsigned int uid_t;
-
-#endif /* _ABIBITS_UID_T_H */
-
+/home/red/CLionProjects/ReddyOS/toolchain/mlibc/abis/linux/uid_t.h

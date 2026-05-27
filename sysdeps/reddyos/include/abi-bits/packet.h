@@ -1,6 +1,1 @@
-#ifndef _ABIBITS_PACKET_H
-#define _ABIBITS_PACKET_H
-
-#define PACKET_HOST 0
-
-#endif /* _ABIBITS_PACKET_H */
+/home/red/CLionProjects/ReddyOS/toolchain/mlibc/abis/linux/packet.h
