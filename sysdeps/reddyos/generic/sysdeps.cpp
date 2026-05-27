@@ -17,13 +17,14 @@
 	({                                                                                             \
 		__ensure(!"STUB function was called");                                                     \
 		__builtin_unreachable();                                                                   \
+		syscall(SYSCALL_STUB, "Libc stub called"); \
 	})
 // ANCHOR_END: stub
 
 namespace mlibc {
 
 void Sysdeps<LibcPanic>::operator()() {
-    STUB();
+    syscall(SYSCALL_STUB, "Libc panic called");
 }
 
 void Sysdeps<LibcLog>::operator()(const char *msg) {

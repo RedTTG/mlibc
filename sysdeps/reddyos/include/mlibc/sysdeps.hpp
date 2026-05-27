@@ -4,7 +4,7 @@
 
 namespace mlibc {
 
-    struct DemoSysdepTags :
+    struct ReddyOSSysdepTags :
         LibcPanic,
         LibcLog,
         Isatty,
@@ -25,6 +25,6 @@ namespace mlibc {
     {};
 
     template<typename Tag>
-    using Sysdeps = SysdepOf<DemoSysdepTags, Tag>;
+    using Sysdeps = SysdepOf<ReddyOSSysdepTags, Tag>;
 
 } // namespace mlibc
