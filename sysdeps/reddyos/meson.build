@@ -1,16 +1,20 @@
+# ANCHOR: supported-options
 sysdep_supported_options = {
     'posix' : true,
     'linux' : false,
     'glibc' : true,
     'bsd' : true,
 }
+# ANCHOR_END: supported-options
 
+# ANCHOR: sources-and-includes
 rtld_sources += files(
     'generic/sysdeps.cpp',
 #    'generic/syscustom.cpp',
 )
 rtld_include_dirs += include_directories('include')
-#
+
+
 libc_sources += files(
     'generic/entry.cpp',
     'generic/sysdeps.cpp',
@@ -18,7 +22,10 @@ libc_sources += files(
     'src/terminal.cpp',
 )
 libc_include_dirs += include_directories('include')
+# ANCHOR_END: sources-and-includes
 
+
+# ANCHOR: abi-includes
 if not no_headers
     install_headers(
         'include/abi-bits/access.h',
@@ -84,6 +91,9 @@ if not no_headers
         follow_symlinks : true
     )
 endif
+# ANCHOR_END: abi-includes
+
+# ANCHOR: crt1
 if not headers_only
     crt = custom_target(
         'crt1',
@@ -95,3 +105,4 @@ if not headers_only
         install_dir : get_option('libdir')
     )
 endif
+# ANCHOR_END: crt1

@@ -1,6 +1,9 @@
 #include <bits/ensure.h>
+#include <bits/syscall.h>
 #include <abi-bits/errno.h>
+#include "mlibc/tcb.hpp"
 #include <mlibc/all-sysdeps.hpp>
+#include <mlibc/sysdeps.hpp>
 #include <reddyos/terminal.h>
 #include <reddyos/syscalls.h>
 #include <sys/stat.h>
@@ -95,7 +98,7 @@ namespace mlibc {
         terminal_write("\n");
     }
 
-    void sys_libc_panic() {
+    void Sysdeps<LibcPanic>::operator()() {
         stub_syscall("sys_libc_panic");
     }
 
