@@ -1,6 +1,7 @@
 #include <bits/ensure.h>
 #include <bits/syscall.h>
 #include <abi-bits/errno.h>
+#include <abi-bits/prctl.h>
 #include "mlibc/tcb.hpp"
 #include <mlibc/all-sysdeps.hpp>
 #include <mlibc/sysdeps.hpp>
@@ -11,6 +12,7 @@
 #include <stddef.h>
 #include <mlibc/fsfd_target.hpp>
 
+#include "../../sysroot/usr/include/reddyos/terminal.h"
 
 // ANCHOR: stub
 #define STUB()                                                                                     \
@@ -46,26 +48,36 @@ int Sysdeps<Write>::operator()(int fd, void const *buf, size_t size, ssize_t *by
 }
 
 int Sysdeps<TcbSet>::operator()(void *pointer) {
-    STUB();
+	terminal_write("Sysdeps<TcbSet> not a stub :3\n");
+    long ret = syscall(SYSCALL_PRCTL, ARCH_SET_FS, (uint64_t)pointer);
+	if (ret < 0)
+		return ret;
+	return 0;
 }
 
 int Sysdeps<AnonAllocate>::operator()(size_t size, void **pointer) {
-    long ret = syscall(SYSCALL_MMAP, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	terminal_write("Sysdeps<AnonAllocate> called with size: ");
+	terminal_write_u64(size);
+	terminal_write(" pointer: ");
+	terminal_write_hex_u64((uint64_t)*pointer);
+	terminal_write("\n");
+    long ret = syscall(SYSCALL_MMAP, nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (ret < 0)
-        return ENOMEM;
+        return ret;
     *pointer = (void*)ret;
     return 0;
 }
 
 int Sysdeps<AnonFree>::operator()(void *, unsigned long) {
+	terminal_write("Sysdeps<AnonFree> STUB");
     STUB();
 } // no-op
 
 int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offset) {
-	long result = syscall(SYSCALL_LSEEK, fd, offset, whence);
-	if (result < 0)
-		return result;
-	*new_offset = result;
+	long ret = syscall(SYSCALL_LSEEK, fd, offset, whence);
+	if (ret < 0)
+		return ret;
+	*new_offset = ret;
 	return 0;
 }
 
@@ -87,7 +99,8 @@ int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offse
 // }
 
 void Sysdeps<Exit>::operator()(int status) {
-    STUB();
+	terminal_write("Sysdeps<Exit> STUB");
+	syscall(SYSCALL_STUB, "Libc panic called");
 }
 
 int Sysdeps<Close>::operator()(int fd) {
@@ -95,9 +108,11 @@ int Sysdeps<Close>::operator()(int fd) {
 }
 
 int Sysdeps<FutexWake>::operator()(int *, bool) {
+	terminal_write("Sysdeps<FutexWake> STUB");
 	STUB();
 }
 int Sysdeps<FutexWait>::operator()(int *, int, timespec const *) {
+	terminal_write("Sysdeps<FutexWait> STUB");
 	STUB();
 }
 int Sysdeps<Read>::operator()(int fd, void *buf, unsigned long count, long *bytes_read) {
@@ -115,21 +130,24 @@ int Sysdeps<Open>::operator()(const char *pathname, int flags, unsigned int mode
 	return 0;
 }
 int Sysdeps<VmMap>::operator()(void *, size_t, int, int, int, off_t, void **) {
+	terminal_write("Sysdeps<VmMap> STUB");
 	STUB();
 }
 int Sysdeps<VmUnmap>::operator()(void *, size_t) {
+	terminal_write("Sysdeps<VmUnmap> STUB");
 	STUB();
 }
 int Sysdeps<ClockGet>::operator()(int, time_t *, long *) {
+	terminal_write("Sysdeps<ClockGet> STUB");
 	STUB();
 }
 
-// int Sysdeps<Ioctl>::operator()(int fd, unsigned long request, void *arg, int *result) {
-// 	long ret = syscall(SYSCALL_IOCTL, fd, request, (uint64_t) arg);
-// 	if (ret < 0)
-// 		return ret;
-// 	*result = ret;
-// 	return 0;
-// }
+int Sysdeps<Ioctl>::operator()(int fd, unsigned long request, void *arg, int *result) {
+	long ret = syscall(SYSCALL_IOCTL, fd, request, (uint64_t) arg);
+	if (ret < 0)
+		return ret;
+	*result = ret;
+	return 0;
+}
 
 } // namespace mlibc

@@ -2,7 +2,7 @@
 sysdep_supported_options = {
     'posix' : true,
     'linux' : false,
-    'glibc' : false,
+    'glibc' : true,
     'bsd' : false,
 }
 # ANCHOR_END: supported-options
@@ -57,6 +57,7 @@ if not no_headers
         'include/abi-bits/pid_t.h',
         'include/abi-bits/poll.h',
         'include/abi-bits/ptrace.h',
+        'include/abi-bits/prctl.h',
         'include/abi-bits/random.h',
         'include/abi-bits/reboot.h',
         'include/abi-bits/resource.h',

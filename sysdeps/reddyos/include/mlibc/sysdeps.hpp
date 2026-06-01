@@ -21,7 +21,8 @@ namespace mlibc {
         Open,
         VmMap,
         VmUnmap,
-        ClockGet
+        ClockGet,
+        Ioctl
     {};
 
     template<typename Tag>
