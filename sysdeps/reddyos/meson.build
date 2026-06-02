@@ -2,7 +2,7 @@
 sysdep_supported_options = {
     'posix' : true,
     'linux' : false,
-    'glibc' : true,
+    'glibc' : false,
     'bsd' : false,
 }
 # ANCHOR_END: supported-options
@@ -11,7 +11,7 @@ sysdep_supported_options = {
 rtld_sources += files(
     'generic/sysdeps.cpp',
     'generic/arch-syscall.cpp',
-#    'generic/syscustom.cpp',
+    'generic/syscustom.cpp',
 )
 rtld_include_dirs += include_directories('include')
 
@@ -21,6 +21,7 @@ libc_sources += files(
     'generic/arch-syscall.cpp',
     'generic/sysdeps.cpp',
     'generic/syscustom.cpp',
+    'generic/libc.cpp',
     'src/terminal.cpp',
 )
 libc_include_dirs += include_directories('include')
