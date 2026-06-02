@@ -48,7 +48,6 @@ int Sysdeps<Write>::operator()(int fd, void const *buf, size_t size, ssize_t *by
 }
 
 int Sysdeps<TcbSet>::operator()(void *pointer) {
-	terminal_write("Sysdeps<TcbSet> not a stub :3\n");
     long ret = syscall(SYSCALL_PRCTL, ARCH_SET_FS, (uint64_t)pointer);
 	if (ret < 0)
 		return ret;
@@ -56,11 +55,6 @@ int Sysdeps<TcbSet>::operator()(void *pointer) {
 }
 
 int Sysdeps<AnonAllocate>::operator()(size_t size, void **pointer) {
-	terminal_write("Sysdeps<AnonAllocate> called with size: ");
-	terminal_write_u64(size);
-	terminal_write(" pointer: ");
-	terminal_write_hex_u64((uint64_t)*pointer);
-	terminal_write("\n");
     long ret = syscall(SYSCALL_MMAP, nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (ret < 0)
         return ret;
@@ -99,7 +93,7 @@ int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offse
 // }
 
 void Sysdeps<Exit>::operator()(int status) {
-	terminal_write("Sysdeps<Exit> STUB");
+	// terminal_write("Sysdeps<Exit> STUB");
 	syscall(SYSCALL_STUB, "Libc panic called");
 }
 
