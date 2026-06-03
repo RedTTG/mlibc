@@ -40,26 +40,23 @@ int Sysdeps<Isatty>::operator()(int fd) {
 }
 
 int Sysdeps<Write>::operator()(int fd, void const *buf, size_t size, ssize_t *bytes_written) {
-	long result = syscall(SYSCALL_WRITE, fd, (uint64_t) buf, size);
-	if (result < 0)
-		return result;
-	*bytes_written = result;
+	long ret = syscall(SYSCALL_WRITE, fd, (uint64_t) buf, size);
+	if(int e = sc_error(ret); e)
+		return e;
+	*bytes_written = ret;
 	return 0;
 }
 
 int Sysdeps<TcbSet>::operator()(void *pointer) {
     long ret = syscall(SYSCALL_PRCTL, ARCH_SET_FS, (uint64_t)pointer);
-	if (ret < 0)
-		return ret;
+	if(int e = sc_error(ret); e)
+		return e;
 	return 0;
 }
 
 int Sysdeps<AnonAllocate>::operator()(size_t size, void **pointer) {
-    long ret = syscall(SYSCALL_MMAP, nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (ret < 0)
-        return ret;
-    *pointer = (void*)ret;
-    return 0;
+	return sysdep<VmMap>(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+			-1, 0, pointer);
 }
 
 int Sysdeps<AnonFree>::operator()(void *, unsigned long) {
@@ -69,8 +66,8 @@ int Sysdeps<AnonFree>::operator()(void *, unsigned long) {
 
 int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offset) {
 	long ret = syscall(SYSCALL_LSEEK, fd, offset, whence);
-	if (ret < 0)
-		return ret;
+	if(int e = sc_error(ret); e)
+		return e;
 	*new_offset = ret;
 	return 0;
 }
@@ -110,22 +107,31 @@ int Sysdeps<FutexWait>::operator()(int *, int, timespec const *) {
 	STUB();
 }
 int Sysdeps<Read>::operator()(int fd, void *buf, unsigned long count, long *bytes_read) {
-	long result = syscall(SYSCALL_READ, fd, (uint64_t) buf, count);
-	if (result < 0)
-		return result;
-	*bytes_read = result;
+	long ret = syscall(SYSCALL_READ, fd, (uint64_t) buf, count);
+	if(int e = sc_error(ret); e)
+		return e;
+	*bytes_read = ret;
 	return 0;
 }
 int Sysdeps<Open>::operator()(const char *pathname, int flags, unsigned int mode, int *fd) {
-	long result = syscall(SYSCALL_OPEN, (uint64_t) pathname, flags, mode);
-	if (result < 0)
-		return result;
-	*fd = result;
+	long ret = syscall(SYSCALL_OPEN, (uint64_t) pathname, flags, mode);
+	if(int e = sc_error(ret); e)
+		return e;
+	*fd = ret;
 	return 0;
 }
-int Sysdeps<VmMap>::operator()(void *, size_t, int, int, int, off_t, void **) {
-	terminal_write("Sysdeps<VmMap> STUB");
-	STUB();
+int Sysdeps<VmMap>::operator()(void *hint, size_t size, int prot, int flags,
+		int fd, off_t offset, void **window) {
+	if(offset % 4096)
+		return EINVAL;
+	if(size >= PTRDIFF_MAX)
+		return ENOMEM;
+	long ret = syscall(SYSCALL_MMAP, hint, size, prot, flags, fd, offset);
+	if(int e = sc_error(ret); e) {
+		return e;
+	}
+	*window = (void*)ret;
+	return 0;
 }
 int Sysdeps<VmUnmap>::operator()(void *, size_t) {
 	terminal_write("Sysdeps<VmUnmap> STUB");
@@ -138,8 +144,8 @@ int Sysdeps<ClockGet>::operator()(int, time_t *, long *) {
 
 int Sysdeps<Ioctl>::operator()(int fd, unsigned long request, void *arg, int *result) {
 	long ret = syscall(SYSCALL_IOCTL, fd, request, (uint64_t) arg);
-	if (ret < 0)
-		return ret;
+	if(int e = sc_error(ret); e)
+		return e;
 	*result = ret;
 	return 0;
 }

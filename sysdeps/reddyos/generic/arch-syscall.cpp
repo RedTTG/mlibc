@@ -5,12 +5,6 @@
 using sc_word_t = __sc_word_t;
 
 extern "C" long __do_syscall_ret(unsigned long ret) {
-#if !defined(MLIBC_BUILDING_RTLD)
-    if (ret > -4096UL) {
-        errno = -ret;
-        return -1;
-    }
-#endif
     return ret;
 }
 
