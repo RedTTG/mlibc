@@ -26,6 +26,7 @@ rtld_include_dirs += include_directories('include')
 libc_sources += files(
     'generic/entry.cpp',
     'generic/libc.cpp',
+    'src/fb.cpp',
 ) + common_sources
 libc_include_dirs += include_directories('include')
 # ANCHOR_END: sources-and-includes
@@ -96,6 +97,11 @@ if not no_headers
         'include/abi-bits/wait.h',
         'include/abi-bits/xattr.h',
         subdir : 'abi-bits',
+        follow_symlinks : true
+    )
+    install_headers(
+        'include/sys/ioctl.h',
+        subdir : 'sys',
         follow_symlinks : true
     )
     install_headers(

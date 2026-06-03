@@ -59,10 +59,9 @@ int Sysdeps<AnonAllocate>::operator()(size_t size, void **pointer) {
 			-1, 0, pointer);
 }
 
-int Sysdeps<AnonFree>::operator()(void *, unsigned long) {
-	terminal_write("Sysdeps<AnonFree> STUB");
-    STUB();
-} // no-op
+int Sysdeps<AnonFree>::operator()(void *addr, size_t size) {
+	return sysdep<VmUnmap>(addr, size);
+}
 
 int Sysdeps<Seek>::operator()(int fd, off_t offset, int whence, off_t *new_offset) {
 	long ret = syscall(SYSCALL_LSEEK, fd, offset, whence);
@@ -127,19 +126,34 @@ int Sysdeps<VmMap>::operator()(void *hint, size_t size, int prot, int flags,
 	if(size >= PTRDIFF_MAX)
 		return ENOMEM;
 	long ret = syscall(SYSCALL_MMAP, hint, size, prot, flags, fd, offset);
-	if(int e = sc_error(ret); e) {
+	if(int e = sc_error(ret); e)
 		return e;
-	}
 	*window = (void*)ret;
 	return 0;
 }
-int Sysdeps<VmUnmap>::operator()(void *, size_t) {
-	terminal_write("Sysdeps<VmUnmap> STUB");
-	STUB();
+int Sysdeps<VmUnmap>::operator()(void *addr, size_t size) {
+	if (size >= PTRDIFF_MAX || (uintptr_t)addr % 4096 != 0)
+		return EINVAL;
+	long ret = syscall(SYSCALL_MUNMAP, addr, size);
+	if(int e = sc_error(ret); e)
+		return e;
+	return 0;
 }
-int Sysdeps<ClockGet>::operator()(int, time_t *, long *) {
-	terminal_write("Sysdeps<ClockGet> STUB");
-	STUB();
+int Sysdeps<ClockGet>::operator()(int clock, time_t *secs, long *nanos) {
+	struct timespec tp = {};
+
+	if (vdso_clock_gettime) {
+		if (int e = vdso_clock_gettime(clock, &tp); e)
+			return e;
+	} else {
+		auto ret = do_syscall(SYS_clock_gettime, clock, &tp);
+		if (int e = sc_error(ret); e)
+			return e;
+	}
+
+	*secs = tp.tv_sec;
+	*nanos = tp.tv_nsec;
+	return 0;
 }
 
 int Sysdeps<Ioctl>::operator()(int fd, unsigned long request, void *arg, int *result) {
