@@ -7,23 +7,26 @@ sysdep_supported_options = {
 }
 # ANCHOR_END: supported-options
 
+common_sources = files(
+    'generic/sysdeps.cpp',
+    'generic/arch-syscall.cpp',
+    'generic/syscustom.cpp',
+    'src/terminal.cpp',
+)
+
 # ANCHOR: sources-and-includes
 rtld_sources += files(
     'generic/sysdeps.cpp',
     'generic/arch-syscall.cpp',
     'generic/syscustom.cpp',
-)
+) + common_sources
 rtld_include_dirs += include_directories('include')
 
 
 libc_sources += files(
     'generic/entry.cpp',
-    'generic/arch-syscall.cpp',
-    'generic/sysdeps.cpp',
-    'generic/syscustom.cpp',
     'generic/libc.cpp',
-    'src/terminal.cpp',
-)
+) + common_sources
 libc_include_dirs += include_directories('include')
 # ANCHOR_END: sources-and-includes
 

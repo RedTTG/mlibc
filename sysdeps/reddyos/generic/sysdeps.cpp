@@ -36,7 +36,7 @@ void Sysdeps<LibcLog>::operator()(const char *msg) {
 }
 
 int Sysdeps<Isatty>::operator()(int fd) {
-    STUB();
+    return 0;
 }
 
 int Sysdeps<Write>::operator()(int fd, void const *buf, size_t size, ssize_t *bytes_written) {
