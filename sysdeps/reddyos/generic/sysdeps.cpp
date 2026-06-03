@@ -142,17 +142,30 @@ int Sysdeps<VmUnmap>::operator()(void *addr, size_t size) {
 int Sysdeps<ClockGet>::operator()(int clock, time_t *secs, long *nanos) {
 	struct timespec tp = {};
 
-	if (vdso_clock_gettime) {
-		if (int e = vdso_clock_gettime(clock, &tp); e)
-			return e;
-	} else {
-		auto ret = do_syscall(SYS_clock_gettime, clock, &tp);
-		if (int e = sc_error(ret); e)
-			return e;
-	}
+	auto ret = syscall(SYSCALL_CLOCK_GETTIME, clock, &tp);
+	if (int e = sc_error(ret); e)
+		return e;
 
 	*secs = tp.tv_sec;
 	*nanos = tp.tv_nsec;
+	return 0;
+}
+
+	int Sysdeps<Sleep>::operator()(time_t *secs, long *nanos) {
+	__ensure(*nanos < 1'000'000'000);
+
+	struct timespec req = {
+		.tv_sec = *secs,
+		.tv_nsec = *nanos
+	};
+	struct timespec rem = {};
+
+	auto ret = syscall(SYSCALL_NANOSLEEP, &req, &rem);
+	if (int e = sc_error(ret); e)
+		return e;
+
+	*secs = rem.tv_sec;
+	*nanos = rem.tv_nsec;
 	return 0;
 }
 

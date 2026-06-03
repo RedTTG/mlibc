@@ -22,6 +22,7 @@ namespace mlibc {
         VmMap,
         VmUnmap,
         ClockGet,
+        Sleep,
         Ioctl
     {};
 
